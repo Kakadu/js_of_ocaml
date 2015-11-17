@@ -7,6 +7,8 @@ all: toplevel.js eval.js
 OCPINDENT=$(shell ocamlfind query ocp-indent -format "-package %p.lib" 2> /dev/null)
 HIGLO=$(shell ocamlfind query higlo.ocaml -format "-package %p -rectypes" 2> /dev/null)
 DERIVING=$(shell ocamlfind query js_of_ocaml.deriving -format "%p" 2> /dev/null)
+OSTAP=$(shell ocamlfind query ostap -format "-package %p -rectypes" 2> /dev/null)
+YOJSON=$(shell ocamlfind query ostap -format "-package %p" 2> /dev/null)
 
 CPPO_OPT=
 ifneq ($(OCPINDENT),)
@@ -41,6 +43,14 @@ PACKAGES += graphics js_of_ocaml.graphics
 CPPO_OPT+= -D graphics
 endif
 
+ifneq ($(OSTAP),)
+PACKAGES += ostap
+endif
+
+ifneq ($(YOJSON),)
+PACKAGES += yojson
+endif
+
 ifeq ($(METAOCAML),1)
 BER_EXPORT=trx runcode print_code
 BER=metalib.cma bertop.cmo \
@@ -54,7 +64,7 @@ endif
 MKTOP=jsoo_mktop -verbose $(SAFESTRING) \
 	${addprefix -top-syntax , ${SYNTAXES}} \
 	-dont-export-unit gc \
-	-jsopt "--disable shortvar" \
+	-jsopt "--pretty --disable shortvar" \
 	${addprefix -export-package , ${PACKAGES}} \
 	${addprefix -export-unit , html5_types html5_sigs xml_wrap } \
 
@@ -63,6 +73,7 @@ TOPLEVEL_OBJS=colorize.cmo indent.cmo toplevel.cmo
 $(TOPLEVEL_NAME).js: $(TOPLEVEL_OBJS) examples.ml test_dynlink.cmo
 	$(MKTOP) \
 	$(BER) \
+	$(OSTAP) $(YOJSON) \
 	$(OCPINDENT) $(HIGLO) \
 	$(TOPLEVEL_OBJS) \
 	${addprefix -jsopt , ${JSFILES}} \
