@@ -8,7 +8,7 @@ OCPINDENT=$(shell ocamlfind query ocp-indent -format "-package %p.lib" 2> /dev/n
 HIGLO=$(shell ocamlfind query higlo.ocaml -format "-package %p -rectypes" 2> /dev/null)
 DERIVING=$(shell ocamlfind query js_of_ocaml.deriving -format "%p" 2> /dev/null)
 OSTAP=$(shell ocamlfind query ostap -format "-package %p -rectypes" 2> /dev/null)
-YOJSON=$(shell ocamlfind query ostap -format "-package %p" 2> /dev/null)
+YOJSON=$(shell ocamlfind query ostap -format "-package %p -rectypes" 2> /dev/null)
 
 CPPO_OPT=
 ifneq ($(OCPINDENT),)
@@ -104,7 +104,7 @@ colorize.cmo: colorize.cmi
 %.cmi:%.mli
 	ocamlfind ocamlc -c -package js_of_ocaml,js_of_ocaml.tyxml $<
 %.cmo:%.ml
-	ocamlfind ocamlc -c -syntax camlp4o $(SAFESTRING) \
+	ocamlfind ocamlc -c -rectypes -syntax camlp4o $(SAFESTRING) \
 		-package js_of_ocaml.syntax,lwt,js_of_ocaml.tyxml,js_of_ocaml.toplevel \
 		-package base64 \
 		-I camlp4 \
