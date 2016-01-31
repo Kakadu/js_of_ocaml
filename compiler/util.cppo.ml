@@ -330,6 +330,12 @@ end
 module Version = struct
   type t = int list
   let split v =
+    let v =
+      (* TODO: support '+' too *)
+      try let pos = String.index v '-' in
+          String.sub v 0 pos
+      with Not_found -> v
+    in
     match split_char '+' v with
     | [] -> assert false
     | x::_ -> List.map int_of_string (split_char '.' x)
