@@ -248,9 +248,9 @@ module Version = struct
   let split v =
     let v =
       (* TODO: support '+' too *)
-      let pos = String.index v '-' in
-      if pos<0 then v
-      else String.sub v 0 pos
+      try let pos = String.index v '-' in
+          String.sub v 0 pos
+      with Not_found -> v
     in
     match split_char '+' v with
     | [] -> assert false
