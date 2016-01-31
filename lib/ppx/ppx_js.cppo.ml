@@ -61,26 +61,34 @@ module Js = struct
     then Typ.constr ?loc (lid s) args
     else Typ.constr ?loc (lid ("Js."^s)) args
 
-#if OCAML_VERSION < (4, 03, 0)
-  let nolabel = ""
+(* Dirty hack for implicits *)
+#if OCAML_VERSION <> (4, 02, 3)
+  let app_nolabel = ""
+  let arr_nolabel = ""
 #else
-  let nolabel = Nolabel
+  let app_nolabel = Papp_simple
+  let arr_nolabel = Parr_simple
 #endif
 
   let unsafe ?loc s args =
-    let args = List.map (fun x -> nolabel,x) args in
+    let args = List.map (fun x -> app_nolabel,x) args in
     if Lazy.force inside_Js
     then Exp.(apply ?loc (ident ?loc (lid ?loc ("Unsafe."^s))) args)
     else Exp.(apply ?loc (ident ?loc (lid ?loc ("Js.Unsafe."^s))) args)
 
   let fun_ ?loc s args =
-    let args = List.map (fun x -> nolabel,x) args in
+    let args = List.map (fun x -> app_nolabel,x) args in
     if Lazy.force inside_Js
     then Exp.(apply ?loc (ident ?loc (lid ?loc s)) args)
     else Exp.(apply ?loc (ident ?loc (lid ?loc ("Js."^s))) args)
 
 end
 
+let app_to_arr_flag = function
+  | Papp_simple -> Parr_simple
+  | Papp_implicit -> Parr_implicit ""
+  | Papp_labelled s -> Parr_labelled s
+  | Papp_optional s -> Parr_optional s
 
 let fresh_type loc = Typ.var ~loc (random_tvar ())
 
@@ -339,7 +347,8 @@ let literal_object self_id fields =
         Js.fun_
           "wrap_meth_callback"
           [
-            annotate_body ((Js.nolabel,Typ.var self_type) :: fun_ty) ret_ty [%expr fun [%p self_id] -> [%e body]]
+            annotate_body ((Js.arr_nolabel,Typ.var self_type) :: fun_ty)
+                          ret_ty [%expr fun [%p self_id] -> [%e body]]
           ])
 
   in
@@ -433,7 +442,7 @@ let js_mapper _args =
           ->
           let meth = exp_to_string meth in
           let obj = mapper.expr mapper  obj in
-          let args = List.map (fun (s,e) -> s, mapper.expr mapper e) args in
+          let args = List.map (fun (s,e) -> app_to_arr_flag s, mapper.expr mapper e) args in
           let new_expr = method_call ~loc:expr.pexp_loc obj meth args in
           mapper.expr mapper  { new_expr with pexp_attributes }
         (* obj##meth *)
@@ -451,7 +460,7 @@ let js_mapper _args =
         | {pexp_desc = Pexp_apply
                          ([%expr [%js [%e? {pexp_desc = Pexp_new constr; _}]]]
                          , args); _ } ->
-          let args = List.map (fun (s,e) -> s, mapper.expr mapper e) args in
+          let args = List.map (fun (s,e) -> app_to_arr_flag s, mapper.expr mapper e) args in
           let new_expr =
             new_object constr args
           in
