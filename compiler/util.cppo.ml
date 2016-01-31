@@ -246,6 +246,12 @@ let find sep s =
 module Version = struct
   type t = int list
   let split v =
+    let v =
+      (* TODO: support '+' too *)
+      let pos = String.index v '-' in
+      if pos<0 then v
+      else String.sub v 0 pos
+    in
     match split_char '+' v with
     | [] -> assert false
     | x::_ -> List.map int_of_string (split_char '.' x)
