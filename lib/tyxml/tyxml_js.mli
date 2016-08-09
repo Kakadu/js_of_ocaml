@@ -57,35 +57,35 @@ module Util : sig
 end
 
 module Svg : Svg_sigs.Make(Xml).T
-  with module Xml.W = Xml_wrap.NoWrap
+  (* with module Xml.W = Xml_wrap.NoWrap *)
 
-module Html : Html_sigs.Make(Xml)(Svg).T
-  with module Xml.W = Xml_wrap.NoWrap
+module Html : Html5_sigs.Make(Xml)(Svg).T
+  (* with module Xml.W = Xml_wrap.NoWrap *)
 
 (** @deprecated Use {!Tyxml_js.Html}. *)
-module Html5 : Html_sigs.Make(Xml)(Svg).T
-  with module Xml.W = Xml_wrap.NoWrap
-   and type 'a elt = 'a Html.elt
+module Html5 : Html5_sigs.Make(Xml)(Svg).T
+  with(*  module Xml.W = Xml_wrap.NoWrap *)
+   (* and *) type 'a elt = 'a Html.elt
    and type +'a attrib = 'a Html.attrib
 
 module Register : sig
 
   val html :
-    ?head:Html_types.head Html.elt ->
-    Html_types.body Html.elt -> unit
+    ?head:Html5_types.head Html.elt ->
+    Html5_types.body Html.elt -> unit
   (** [Register.html head body] uses the given head and body elements
       as document. It replaces the previous body and head.
 
       [head] and [body] can be reactive.
   *)
 
-  val body : ?keep:bool -> [< Html_types.body_content] Html.elt list -> unit
+  val body : ?keep:bool -> [< Html5_types.body_content] Html.elt list -> unit
   (** [Register.body elements] add [elements] as children of [body].
       If [keep] is false (default is true), the children of the body are
       removed before adding the new elements.
   *)
 
-  val head : ?keep:bool -> [< Html_types.head_content] Html.elt list -> unit
+  val head : ?keep:bool -> [< Html5_types.head_content] Html.elt list -> unit
   (** [Register.head elements] add [elements] as children of [body].
       If [keep] is false (default is true), the children of the head are
       removed before adding the new elements.
@@ -109,13 +109,13 @@ module R : sig
     with type +'a elt = 'a Svg.elt
      and type +'a attrib = 'a Svg.attrib
 
-  module Html : Html_sigs.Make(Xml)(Svg).T
+  module Html : Html5_sigs.Make(Xml)(Svg).T
     with type +'a elt = 'a Html.elt
      and type +'a attrib = 'a Html.attrib
   val filter_attrib : 'a Html.attrib -> bool React.signal -> 'a Html.attrib
 
   (** @deprecated Use {!Tyxml_js.R.Html}. *)
-  module Html5 : Html_sigs.Make(Xml)(Svg).T
+  module Html5 : Html5_sigs.Make(Xml)(Svg).T
     with type +'a elt = 'a Html.elt
      and type +'a attrib = 'a Html.attrib
 

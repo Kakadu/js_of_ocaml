@@ -159,7 +159,7 @@ end
 
 
 module Svg = Svg_f.Make(Xml_Svg)
-module Html = Html_f.Make(Xml)(Svg)
+module Html = Html5_f.Make(Xml)(Svg)
 module Html5 = Html
 
 module To_dom = Tyxml_cast.MakeTo(struct
@@ -359,7 +359,7 @@ module R = struct
   end
 
   module Svg = Svg_f.Make(Xml_Svg)
-  module Html = Html_f.Make(Xml)(Svg)
+  module Html = Html5_f.Make(Xml)(Svg)
   module Html5 = Html
 
 end
